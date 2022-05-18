@@ -5,9 +5,9 @@ This repository provides a sample Unity project that implements different model 
 
 ## Sample Unity Scenes
 
-| Scene                           | Description                                                  | fastai Tutorial                                              |
-| ------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| BIWI_Head_Pose                  | Predict the center head coordinates of a person in an image using a model trained on the [Biwi Kinect Head Pose Dataset](https://data.vision.ee.ethz.ch/cvl/gfanelli/head_pose/head_forest.html#db). | [Points](https://docs.fast.ai/tutorial.vision.html#Points)   |
-| Oxford-IIT_Breed_Classification | Classify an image as containing one of the 37 bet breeds from the [Oxford-IIIT Pet Dataset](https://www.robots.ox.ac.uk/~vgg/data/pets/). | [Classifying breeds](https://docs.fast.ai/tutorial.vision.html#Classifying-breeds) |
-|                                 |                                                              |                                                              |
+| Scene                             | Description                                                  | fastai Tutorial                                              |
+| --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| BIWI_Head_Pose                    | Predict the center head coordinates of a person in an image using a model trained on the [Biwi Kinect Head Pose Dataset](https://data.vision.ee.ethz.ch/cvl/gfanelli/head_pose/head_forest.html#db). | [Points](https://docs.fast.ai/tutorial.vision.html#Points)   |
+| Oxford-IIT_Breed_Classification   | Classify an image as containing one of the 37 bet breeds from the [Oxford-IIIT Pet Dataset](https://www.robots.ox.ac.uk/~vgg/data/pets/). | [Classifying breeds](https://docs.fast.ai/tutorial.vision.html#Classifying-breeds) |
+| Pascal_Multi-lable_Classification | Perform multi-label classification using a model trained on the [Pascal Dataset](http://host.robots.ox.ac.uk/pascal/VOC/). | [Multi-label classification](https://docs.fast.ai/tutorial.vision.html#Multi-label-classification) |
 
