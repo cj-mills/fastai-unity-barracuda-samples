@@ -357,5 +357,5 @@ MonoBehaviour:
   workerType: 32768
   outputLayerIndex: 0
   useNCHW: 1
-  threshold: 0.2
+  confidenceThreshold: 0.2
   printDebugMessages: 1
