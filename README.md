@@ -1,5 +1,5 @@
 # fastai Unity Barracuda Samples
-This repository provides a sample Unity project that implements different model trained with the [fastai](https://docs.fast.ai/) library using the [Barracuda](https://docs.unity3d.com/Packages/com.unity.barracuda@3.0/manual/index.html) library along with the Jupyter notebooks used to train the models.
+This repository provides a sample Unity project that implements different models trained with the [fastai](https://docs.fast.ai/) library using the [Barracuda](https://docs.unity3d.com/Packages/com.unity.barracuda@3.0/manual/index.html) library along with the Jupyter notebooks used to train and export the models.
 
 
 
