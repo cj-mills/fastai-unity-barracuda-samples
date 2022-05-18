@@ -260,7 +260,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 78417b545a9e3d64db37adc1f84b33d7, type: 2}
+  - {fileID: 2100000, guid: c869343c473da924f9fc194f03df72ef, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -337,7 +337,7 @@ MonoBehaviour:
   screen: {fileID: 579329321}
   inputDims: {x: 320, y: 240}
   processingShader: {fileID: 7200000, guid: 31bbfd1191cb79e458e3a7f8756404a8, type: 3}
-  modelAsset: {fileID: 5022602860645237092, guid: acb5ae4e0d6c0f6479d1cc3c7858da0d, type: 3}
+  modelAsset: {fileID: 5022602860645237092, guid: 92b43060b734408468f1c51ab8fb50f0, type: 3}
   workerType: 32768
   outputLayerIndex: 0
   useNCHW: 1
