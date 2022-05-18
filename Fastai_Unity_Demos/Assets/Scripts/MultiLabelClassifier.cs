@@ -19,7 +19,7 @@ public class MultiLabelClassifier : MonoBehaviour
     [Header("Barracuda")]
     [Tooltip("The Barracuda/ONNX asset file")]
     public NNModel modelAsset;
-    [Tooltip("The name for the custom softmax output layer")]
+    [Tooltip("The name for the custom sigmoid output layer")]
     public string sigmoidLayer = "sigmoidLayer";
     [Tooltip("The model execution backend")]
     public WorkerFactory.Type workerType = WorkerFactory.Type.Auto;
@@ -96,7 +96,7 @@ public class MultiLabelClassifier : MonoBehaviour
 
         // Create a model builder to modify the m_RunTimeModel
         ModelBuilder modelBuilder = new ModelBuilder(m_RunTimeModel);
-        // Add a new Softmax layer
+        // Add a new sigmoid layer
         modelBuilder.Sigmoid(sigmoidLayer, outputLayer);
 
         // Initialize the interface for executing the model
