@@ -1,11 +1,14 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CamVidMaskImage
 
+//
+Texture2D<float4> SourceImage;
 // The pixel data for the input image
-Texture2D<float4> InputImage;
+Texture2D<float4> MaskTexture;
 // The pixel data for the processed image
 RWTexture2D<float4> Result;
 
+float maskWeight;
 
 
  //Apply the ImageNet normalization stats from PyTorch to an image
@@ -80,13 +83,18 @@ void CamVidMaskImage(uint3 id : SV_DispatchThreadID)
         float3(160.0f, 82.0f, 45.0f)
     };
  
-    int index = (int)InputImage[id.xy].r;
 
-    // Set the pixel color values for the processed image
-    Result[id.xy] = float4(
+    // Get the label index from the red color channel
+    int index = (int)MaskTexture[id.xy].r;
+
+    // Get the mask color value for the current pixel
+    float4 maskColor = float4(
         colors[index].r / 255.0f,
         colors[index].g / 255.0f,
         colors[index].b / 255.0f,
         1.0f
         );
+
+    // Set the pixel color values for the processed image
+    Result[id.xy] = maskColor * maskWeight + (1 - maskWeight) * SourceImage[id.xy];
 }
