@@ -112,6 +112,48 @@ public class Utils : MonoBehaviour
 
 
     /// <summary>
+    /// Apply a segmentation mask to an image on the GPU
+    /// </summary>
+    /// <param name="mask">The segmentation mask</param>
+    /// <param name="source">The source image</param>
+    /// <param name="maskWeight">The mask weight for blending the segmentation mask and source image</param>
+    /// <param name="computeShader">The target ComputerShader</param>
+    /// <param name="functionName">The target ComputeShader function</param>
+    /// <returns></returns>
+    public static void MaskImageGPU(RenderTexture mask, RenderTexture source, float maskWeight, ComputeShader computeShader, string functionName)
+    {
+        // Specify the number of threads on the GPU
+        int numthreads = 8;
+        // Get the index for the specified function in the ComputeShader
+        int kernelHandle = computeShader.FindKernel(functionName);
+        // Define a temporary HDR RenderTexture
+        RenderTexture result = RenderTexture.GetTemporary(mask.width, mask.height, 24, mask.format);
+        // Enable random write access
+        result.enableRandomWrite = true;
+        // Create the HDR RenderTexture
+        result.Create();
+
+        // Set the value for the Result variable in the ComputeShader
+        computeShader.SetTexture(kernelHandle, "Result", result);
+        // Set the value for the MaskTexture variable in the ComputeShader
+        computeShader.SetTexture(kernelHandle, "MaskTexture", mask);
+        // Set the value for the SourceImage variable in the ComputeShader
+        computeShader.SetTexture(kernelHandle, "SourceImage", source);
+        // Set the value for the maskWeight variable in the ComputeShader
+        computeShader.SetFloat("maskWeight", maskWeight);
+
+        // Execute the ComputeShader
+        computeShader.Dispatch(kernelHandle, result.width / numthreads, result.height / numthreads, 1);
+
+        // Copy the result into the source RenderTexture
+        Graphics.Blit(result, mask);
+
+        // Release the temporary RenderTexture
+        RenderTexture.ReleaseTemporary(result);
+    }
+
+
+    /// <summary>
     /// Scale the source image resolution to the target input dimensions
     /// while maintaing the source aspect ratio.
     /// </summary>
