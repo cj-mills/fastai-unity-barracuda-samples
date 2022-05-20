@@ -15,76 +15,76 @@ float maskWeight;
 [numthreads(8, 8, 1)]
 void CamVidMaskImage(uint3 id : SV_DispatchThreadID)
 {
-    float3 colors[32] =
+    int3 colors[32] =
     {
         // Animal
-        float3(186.0f, 85.0f, 211.0f),
+        int3(89, 175, 198),
         // Archway
-        float3(75.0f, 0.0f, 130.0f),
+        int3(127, 80, 237),
         // Bicyclist
-        float3(0.0f, 0.0f, 0.0f),
+        int3(249, 135, 4),
         // Bridge
-        float3(238.0f, 232.0f, 170.0f),
+        int3(102, 17, 175),
         // Building
-        float3(255.0f, 69.0f, 0.0f),
+        int3(65, 209, 211),
         // Car
-        float3(165.0f, 42.0f, 42.0f),
+        int3(138, 173, 12),
         // CartLuggagePram
-        float3(0.0f, 0.0f, 255.0f),
+        int3(247, 218, 56),
         // Child
-        float3(0.0f, 0.0f, 139.0f),
+        int3(93, 234, 105),
         // Column_Pole
-        float3(240.0f, 255.0f, 255.0f),
+        int3(244, 194, 41),
         // Fence
-        float3(240.0f, 128.0f, 128.0f),
+        int3(16, 104, 181),
         // LaneMkgsDriv
-        float3(255.0f, 182.0f, 193.0f),
+        int3(178, 44, 60),
         // LaneMkgsNonDriv
-        float3(0.0f, 0.0f, 128.0f),
+        int3(60, 232, 88),
         // Misc_Text
-        float3(245.0f, 222.0f, 179.0f),
+        int3(42, 70, 211),
         // MotorcycleScooter
-        float3(127.0f, 255.0f, 212.0f),
+        int3(75, 211, 44),
         // OtherMoving
-        float3(25.0f, 25.0f, 112.0f),
+        int3(95, 47, 216),
         // ParkingBlock
-        float3(188.0f, 143.0f, 143.0f),
+        int3(3, 157, 163),
         // Pedestrian
-        float3(255.0f, 105.0f, 180.0f),
+        int3(162, 247, 89),
         // Road
-        float3(255.0f, 250.0f, 250.0f),
+        int3(226, 134, 83),
         // RoadShoulder
-        float3(255.0f, 218.0f, 185.0f),
+        int3(106, 235, 252),
         // Sidewalk
-        float3(123.0f, 104.0f, 238.0f),
+        int3(216, 180, 49),
         // SignSymbol
-        float3(255.0f, 0.0f, 0.0f),
+        int3(232, 219, 102),
         // Sky
-        float3(248.0f, 248.0f, 255.0f),
+        int3(252, 45, 59),
         // SUVPickupTruck
-        float3(95.0f, 158.0f, 160.0f),
+        int3(12, 244, 4),
         // TrafficCone
-        float3(255.0f, 160.0f, 122.0f),
+        int3(62, 224, 181),
         // TrafficLight
-        float3(128.0f, 128.0f, 128.0f),
+        int3(32, 156, 191),
         // Train
-        float3(143.0f, 188.0f, 143.0f),
+        int3(224, 153, 71),
         // Tree
-        float3(220.0f, 220.0f, 220.0f),
+        int3(239, 207, 62),
         // Truck_Bus
-        float3(153.0f, 102.0f, 204.0f),
+        int3(80, 139, 206),
         // Tunnel
-        float3(238.0f, 130.0f, 238.0f),
+        int3(204, 34, 178),
         // VegetationMisc
-        float3(0.0f, 128.0f, 128.0f),
+        int3(65, 198, 172),
         // Void
-        float3(255.0f, 192.0f, 203.0f),
+        int3(190, 32, 234),
         // Wall
-        float3(160.0f, 82.0f, 45.0f)
+        int3(7, 130, 81)
     };
  
 
-    // Get the label index from the red color channel
+    // Get the label index
     int index = (int)MaskTexture[id.xy].r;
 
     // Get the mask color value for the current pixel
