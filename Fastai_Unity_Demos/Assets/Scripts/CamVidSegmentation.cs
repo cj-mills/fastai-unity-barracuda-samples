@@ -28,13 +28,13 @@ public class CamVidSegmentation : MonoBehaviour
     public bool useNCHW = true;
 
     [Header("Output Processing")]
-    [Tooltip("")]
-    public bool maskImage = true;
-    [Tooltip("")]
+    [Tooltip("The compute shader for applying a segmentation mask on the GPU")]
     public ComputeShader maskShader;
-    //[Tooltip("")]
-    //[Range(0f, 1f)]
-    //public float maskWeight = 1f;
+    [Tooltip("Apply the predicted segmentation mask to the source image")]
+    public bool maskImage = true;
+    [Tooltip("The mask weight for blending the segmentation mask and source image")]
+    [Range(0f, 1f)]
+    public float maskWeight = 1f;
 
     [Header("Debugging")]
     [Tooltip("Print debugging messages to the console")]
@@ -55,8 +55,10 @@ public class CamVidSegmentation : MonoBehaviour
     private RenderTexture inputTexture;
     // The source image dimensions
     private Vector2Int imageDims;
-
+    // The predicted segmentation mask
     private RenderTexture maskTexture;
+    // The masked output image
+    private RenderTexture outputImage;
 
     // The ordered list of class names
     private string[] classes = new string[] {
@@ -99,9 +101,8 @@ public class CamVidSegmentation : MonoBehaviour
     {
         // Initialize the texture which stores the model input
         inputTexture = new RenderTexture(inputDims.x, inputDims.y, 24, RenderTextureFormat.ARGBHalf);
-        // 
+        // Initialize the texture which stores the predicted segmentation mask
         maskTexture = new RenderTexture(inputDims.x, inputDims.y, 24, RenderTextureFormat.ARGBHalf);
-        
 
         // Get the source image texture
         imageTexture = Utils.GetScreenTexture(screen);
@@ -123,7 +124,12 @@ public class CamVidSegmentation : MonoBehaviour
 
         // Initialize the interface for executing the model
         engine = Utils.InitializeWorker(modelBuilder.model, workerType, useNCHW);
+
+        // Initialize the texture which stores the masked output image
+        outputImage = new RenderTexture(imageTexture.width, imageTexture.height, 24, RenderTextureFormat.ARGBHalf);
     }
+
+    
 
     /// <summary>
     /// Process the raw model output to get the predicted class index
@@ -137,13 +143,20 @@ public class CamVidSegmentation : MonoBehaviour
         if (printDebugMessages) Debug.Log(output.shape);
         if (printDebugMessages) Debug.Log(output[0]);
 
-
+        // Copy model output to a RenderTexture
         output.ToRenderTexture(maskTexture);
-        RenderTexture.active = maskTexture;
-        Utils.ProcessImageGPU(maskTexture, maskShader, "CamVidMaskImage");        
 
-        // 
-        screen.gameObject.GetComponent<MeshRenderer>().material.mainTexture = maskImage ? maskTexture : imageTexture;
+        // Copy the mask texture into the higher resolution output texture
+        Graphics.Blit(maskTexture, outputImage);
+        // Copy the source image texture into a temporary RenderTexture
+        RenderTexture sourceImage = RenderTexture.GetTemporary(imageTexture.width, imageTexture.height, 24, RenderTextureFormat.ARGBHalf);
+        Graphics.Blit(imageTexture, sourceImage);
+        // Apply the predicted mask color values to the image
+        Utils.MaskImageGPU(outputImage, sourceImage, maskWeight, maskShader, "CamVidMaskImage");
+        // Release the temporary RenderTexture
+        RenderTexture.ReleaseTemporary(sourceImage);
+        // Update the texture for the screen object
+        screen.gameObject.GetComponent<MeshRenderer>().material.mainTexture = maskImage ? outputImage : imageTexture;
         
         // Dispose Tensor and associated memories.
         output.Dispose();
@@ -165,7 +178,7 @@ public class CamVidSegmentation : MonoBehaviour
         // Dispose Tensor and associated memories.
         input.Dispose();
 
-        // 
+        // Get the predicted label colors
         ProcessOutput(engine);
     }
 
@@ -174,6 +187,7 @@ public class CamVidSegmentation : MonoBehaviour
     private void OnDisable()
     {
         Destroy(inputTexture);
+        Destroy(outputImage);
 
         // Release the resources allocated for the inference engine
         engine.Dispose();
