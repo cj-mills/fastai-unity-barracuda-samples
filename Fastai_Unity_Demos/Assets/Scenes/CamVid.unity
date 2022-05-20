@@ -357,6 +357,7 @@ MonoBehaviour:
   workerType: 32768
   outputLayerIndex: 0
   useNCHW: 1
-  maskImage: 1
   maskShader: {fileID: 7200000, guid: 588bd120e1c69384d8a214da05b09886, type: 3}
+  maskImage: 1
+  maskWeight: 0.75
   printDebugMessages: 0
