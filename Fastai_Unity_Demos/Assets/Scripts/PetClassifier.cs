@@ -224,6 +224,7 @@ public class PetClassifier : MonoBehaviour
         }
         else
         {
+            // Disable asynchronous GPU readback when not using Compute Shaders
             useAsyncGPUReadback = false;
 
             // Define a temporary HDR RenderTexture
