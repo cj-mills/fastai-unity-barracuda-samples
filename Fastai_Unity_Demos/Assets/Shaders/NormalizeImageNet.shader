@@ -39,12 +39,15 @@ Shader "Processing Shaders/NormalizeImageNet"
 
             sampler2D _MainTex;
 
-
+            // Set the pixel color values for the processed image
             float4 frag(v2f i) : SV_Target
             {
                 float4 col = tex2D(_MainTex, i.uv);
+                // Normalize the red color channel values
                 col.r = (col.r - 0.4850) / 0.2290;
+                // Normalize the green color channel values
                 col.g = (col.g - 0.4560) / 0.2240;
+                // Normalize the blue color channel values
                 col.b = (col.b - 0.4060) / 0.2250;
                 return col;
             }
