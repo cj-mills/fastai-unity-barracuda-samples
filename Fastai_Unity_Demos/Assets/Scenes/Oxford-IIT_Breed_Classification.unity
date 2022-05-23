@@ -352,9 +352,12 @@ MonoBehaviour:
   screen: {fileID: 579329321}
   targetDim: 224
   processingShader: {fileID: 7200000, guid: 31bbfd1191cb79e458e3a7f8756404a8, type: 3}
+  processingMaterial: {fileID: 2100000, guid: b7471655d6e59b9429d2b0d42a3ebb81, type: 2}
   modelAsset: {fileID: 5022602860645237092, guid: 3f01eea9d777ee04fabf8549e1c5530e, type: 3}
   softmaxLayer: softmaxLayer
-  workerType: 32768
+  argmaxLayer: argmaxLayer
+  workerType: 256
   outputLayerIndex: 0
   useNCHW: 1
+  useAsyncGPUReadback: 1
   printDebugMessages: 1
