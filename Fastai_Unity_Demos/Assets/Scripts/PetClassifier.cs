@@ -15,7 +15,8 @@ public class PetClassifier : MonoBehaviour
     public int targetDim = 224;
     [Tooltip("The compute shader for GPU processing")]
     public ComputeShader processingShader;
-
+    [Tooltip("The material with the fragment shader for GPU processing")]
+    public Material processingMaterial;
     [Header("Barracuda")]
     [Tooltip("The Barracuda/ONNX asset file")]
     public NNModel modelAsset;
@@ -212,11 +213,33 @@ public class PetClassifier : MonoBehaviour
 
         // Copy the source image texture into model input texture
         Graphics.Blit(imageTexture, inputTexture);
-        // Normalize the input pixel data
-        Utils.ProcessImageGPU(inputTexture, processingShader, "NormalizeImageNet");
 
-        // Initialize a Tensor using the inputTexture
-        input = new Tensor(inputTexture, channels: 3);
+
+        if (workerType == WorkerFactory.Type.ComputePrecompiled)
+        {
+            // Normalize the input pixel data
+            Utils.ProcessImageGPU(inputTexture, processingShader, "NormalizeImageNet");
+            // Initialize a Tensor using the inputTexture
+            input = new Tensor(inputTexture, channels: 3);
+        }
+        else
+        {
+            useAsyncGPUReadback = false;
+
+            // Define a temporary HDR RenderTexture
+            RenderTexture result = RenderTexture.GetTemporary(inputTexture.width, 
+                inputTexture.height, 24, RenderTextureFormat.ARGBHalf);
+            RenderTexture.active = result;
+
+            // Apply preprocessing steps
+            Graphics.Blit(inputTexture, result, processingMaterial);
+
+            // Initialize a Tensor using the inputTexture
+            input = new Tensor(result, channels: 3);
+            RenderTexture.ReleaseTemporary(result);
+        }
+        
+        
         // Execute the model with the input Tensor
         engine.Execute(input);
         // Dispose Tensor and associated memories.
@@ -232,6 +255,9 @@ public class PetClassifier : MonoBehaviour
             return;
         }
         if (printDebugMessages) Debug.Log($"Predicted Class: {classes[classIndex]}");
+
+        // Unload assets when running in a web browser
+        if (Application.platform == RuntimePlatform.WebGLPlayer) Resources.UnloadUnusedAssets();
     }
 
 
