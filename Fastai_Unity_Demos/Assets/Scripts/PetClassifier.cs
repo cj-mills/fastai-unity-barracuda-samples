@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Barracuda;
+using UnityEngine.Rendering;
 
 public class PetClassifier : MonoBehaviour
 {
@@ -20,12 +21,18 @@ public class PetClassifier : MonoBehaviour
     public NNModel modelAsset;
     [Tooltip("The name for the custom softmax output layer")]
     public string softmaxLayer = "softmaxLayer";
+    [Tooltip("The name for the custom softmax output layer")]
+    public string argmaxLayer = "argmaxLayer";
     [Tooltip("The model execution backend")]
     public WorkerFactory.Type workerType = WorkerFactory.Type.Auto;
     [Tooltip("The target output layer index")]
     public int outputLayerIndex = 0;
     [Tooltip("EXPERIMENTAL: Indicate whether to order tensor data channels first")]
     public bool useNCHW = true;
+
+    [Header("Output Processing")]
+    [Tooltip("Asynchronously download model output from the GPU to the CPU.")]
+    public bool useAsyncGPUReadback = true;
 
     [Header("Debugging")]
     [Tooltip("Print debugging messages to the console")]
@@ -46,6 +53,11 @@ public class PetClassifier : MonoBehaviour
     private RenderTexture inputTexture;
     // The source image dimensions
     private Vector2Int imageDims;
+
+    // Stores the raw model output on the GPU when using useAsyncGPUReadback
+    private RenderTexture outputTextureGPU;
+    // Stores the raw model output on the CPU when using useAsyncGPUReadback
+    private Texture2D outputTextureCPU;
 
     // The ordered list of class names
     private string[] classes = new string[] { 
@@ -107,12 +119,44 @@ public class PetClassifier : MonoBehaviour
 
         // Create a model builder to modify the m_RunTimeModel
         ModelBuilder modelBuilder = new ModelBuilder(m_RunTimeModel);
+
         // Add a new Softmax layer
         modelBuilder.Softmax(softmaxLayer, outputLayer);
-
+        // Add a new Argmax layer
+        modelBuilder.Reduce(Layer.Type.ArgMax, argmaxLayer, softmaxLayer);
         // Initialize the interface for executing the model
         engine = Utils.InitializeWorker(modelBuilder.model, workerType, useNCHW);
+
+        // Initialize the GPU output texture
+        outputTextureGPU = RenderTexture.GetTemporary(1, 1, 24, RenderTextureFormat.ARGBHalf);
+        // Initialize the CPU output texture
+        outputTextureCPU = new Texture2D(1, 1, TextureFormat.RGBAHalf, false);
+        
     }
+
+
+    /// <summary>
+    /// Called once AsyncGPUReadback has been completed
+    /// </summary>
+    /// <param name="request"></param>
+    void OnCompleteReadback(AsyncGPUReadbackRequest request)
+    {
+        if (request.hasError)
+        {
+            Debug.Log("GPU readback error detected.");
+            return;
+        }
+
+        // Make sure the Texture2D is not null
+        if (outputTextureCPU)
+        {
+            // Fill Texture2D with raw data from the AsyncGPUReadbackRequest
+            outputTextureCPU.LoadRawTextureData(request.GetData<uint>());
+            // Apply changes to Textur2D
+            outputTextureCPU.Apply();
+        }
+    }
+
 
     /// <summary>
     /// Process the raw model output to get the predicted class index
@@ -121,12 +165,33 @@ public class PetClassifier : MonoBehaviour
     /// <returns></returns>
     int ProcessOutput(IWorker engine)
     {
+        int classIndex = -1;
+
         // Get raw model output
-        Tensor output = engine.PeekOutput(softmaxLayer);
-        // Get the index with the highest confidence value
-        int classIndex = output.ArgMax()[0];
+        Tensor output = engine.PeekOutput(argmaxLayer);
+
+        if (useAsyncGPUReadback)
+        {
+            // Copy model output to a RenderTexture
+            output.ToRenderTexture(outputTextureGPU);
+            // Asynchronously download model output from the GPU to the CPU
+            AsyncGPUReadback.Request(outputTextureGPU, 0, TextureFormat.RGBAHalf, OnCompleteReadback);
+            // Get the predicted class index
+            classIndex = (int)outputTextureCPU.GetPixel(0, 0).r;
+
+            if (classIndex == -23)
+            {
+                Debug.Log("Output texture still needs to initialize, defaulting to classIndex=-1");
+                classIndex = -1;
+            }
+        }
+        else
+        {
+            // Get the predicted class index
+            classIndex = (int)output[0];
+        }
+
         if (printDebugMessages) Debug.Log($"Class Index: {classIndex}");
-        if (printDebugMessages) Debug.Log($"Confidence Score: {output[classIndex]}");
 
         // Dispose Tensor and associated memories.
         output.Dispose();
@@ -161,6 +226,11 @@ public class PetClassifier : MonoBehaviour
         RenderTexture.ReleaseTemporary(inputTexture);
         // Get the predicted class index
         int classIndex = ProcessOutput(engine);
+        if (classIndex < 0 || classIndex >= classes.Length)
+        {
+            Debug.Log("Invalid class index");
+            return;
+        }
         if (printDebugMessages) Debug.Log($"Predicted Class: {classes[classIndex]}");
     }
 
@@ -168,6 +238,8 @@ public class PetClassifier : MonoBehaviour
     // OnDisable is called when the MonoBehavior becomes disabled
     private void OnDisable()
     {
+        RenderTexture.ReleaseTemporary(outputTextureGPU);
+
         // Release the resources allocated for the inference engine
         engine.Dispose();
     }
