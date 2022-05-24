@@ -17,6 +17,7 @@ public class PetClassifier : MonoBehaviour
     public ComputeShader processingShader;
     [Tooltip("The material with the fragment shader for GPU processing")]
     public Material processingMaterial;
+
     [Header("Barracuda")]
     [Tooltip("The Barracuda/ONNX asset file")]
     public NNModel modelAsset;
@@ -38,6 +39,14 @@ public class PetClassifier : MonoBehaviour
     [Header("Debugging")]
     [Tooltip("Print debugging messages to the console")]
     public bool printDebugMessages = true;
+    [Tooltip("The on-screen text color")]
+    public Color textColor = Color.red;
+    [Tooltip("The scale value for the on-screen font size")]
+    [Range(0, 100)]
+    public int fontScale = 50;
+    [Tooltip("The number of seconds to wait between refreshing the fps value")]
+    [Range(0.01f, 1.0f)]
+    public float fpsRefreshRate = 0.1f;
 
     // The neural net model data structure
     private Model m_RunTimeModel;
@@ -59,6 +68,14 @@ public class PetClassifier : MonoBehaviour
     private RenderTexture outputTextureGPU;
     // Stores the raw model output on the CPU when using useAsyncGPUReadback
     private Texture2D outputTextureCPU;
+    
+    // Stores the predicted class index
+    private int classIndex;
+
+    // The current frame rate value
+    private int fps = 0;
+    // Controls when the frame rate value updates
+    private float fpsTimer = 0f;
 
     // The ordered list of class names
     private string[] classes = new string[] { 
@@ -215,7 +232,7 @@ public class PetClassifier : MonoBehaviour
         Graphics.Blit(imageTexture, inputTexture);
 
 
-        if (workerType == WorkerFactory.Type.ComputePrecompiled)
+        if (SystemInfo.supportsComputeShaders)
         {
             // Normalize the input pixel data
             Utils.ProcessImageGPU(inputTexture, processingShader, "NormalizeImageNet");
@@ -249,7 +266,7 @@ public class PetClassifier : MonoBehaviour
         // Release the input texture
         RenderTexture.ReleaseTemporary(inputTexture);
         // Get the predicted class index
-        int classIndex = ProcessOutput(engine);
+        classIndex = ProcessOutput(engine);
         if (classIndex < 0 || classIndex >= classes.Length)
         {
             Debug.Log("Invalid class index");
@@ -261,6 +278,36 @@ public class PetClassifier : MonoBehaviour
         if (Application.platform == RuntimePlatform.WebGLPlayer) Resources.UnloadUnusedAssets();
     }
 
+
+    // OnGUI is called for rendering and handling GUI events.
+    public void OnGUI()
+    {
+        if (!printDebugMessages) return;
+
+        if (classIndex < 0 || classIndex >= classes.Length)
+        {
+            Debug.Log("Invalid class index");
+            return;
+        }
+
+        Rect labelRect = new Rect(10, 10, 500, 500);
+
+        GUIStyle style = new GUIStyle();
+        style.fontSize = (int)(Screen.width * (1f / (100f - fontScale)));
+        style.normal.textColor = textColor;
+
+        string content = $"Predicted Class: {classes[classIndex]}";
+        GUI.Label(labelRect, new GUIContent(content), style);
+
+        if (Time.unscaledTime > fpsTimer)
+        {
+            fps = (int)(1f / Time.unscaledDeltaTime);
+            fpsTimer = Time.unscaledTime + fpsRefreshRate;
+        }
+
+        Rect fpsRect = new Rect(10, style.fontSize * 1.5f, 500, 500);
+        GUI.Label(fpsRect, new GUIContent($"FPS: {fps}"), style);
+    }
 
     // OnDisable is called when the MonoBehavior becomes disabled
     private void OnDisable()
