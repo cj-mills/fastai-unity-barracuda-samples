@@ -14,6 +14,8 @@ public class CamVidSegmentation : MonoBehaviour
     public Vector2Int inputDims = new Vector2Int(320, 240);
     [Tooltip("The compute shader for GPU processing")]
     public ComputeShader processingShader;
+    [Tooltip("The material with the fragment shader for GPU processing")]
+    public Material processingMaterial;
 
     [Header("Barracuda")]
     [Tooltip("The Barracuda/ONNX asset file")]
@@ -39,6 +41,14 @@ public class CamVidSegmentation : MonoBehaviour
     [Header("Debugging")]
     [Tooltip("Print debugging messages to the console")]
     public bool printDebugMessages = true;
+    [Tooltip("The on-screen text color")]
+    public Color textColor = Color.red;
+    [Tooltip("The scale value for the on-screen font size")]
+    [Range(0, 100)]
+    public int fontScale = 50;
+    [Tooltip("The number of seconds to wait between refreshing the fps value")]
+    [Range(0.01f, 1.0f)]
+    public float fpsRefreshRate = 0.1f;
 
     // The neural net model data structure
     private Model m_RunTimeModel;
@@ -59,6 +69,11 @@ public class CamVidSegmentation : MonoBehaviour
     private RenderTexture maskTexture;
     // The masked output image
     private RenderTexture outputImage;
+
+    // The current frame rate value
+    private int fps = 0;
+    // Controls when the frame rate value updates
+    private float fpsTimer = 0f;
 
     // The ordered list of class names
     private string[] classes = new string[] {
@@ -141,7 +156,6 @@ public class CamVidSegmentation : MonoBehaviour
         // Get raw model output
         Tensor output = engine.PeekOutput(argmaxLayer);
         if (printDebugMessages) Debug.Log(output.shape);
-        if (printDebugMessages) Debug.Log(output[0]);
 
         // Copy model output to a RenderTexture
         output.ToRenderTexture(maskTexture);
@@ -168,11 +182,29 @@ public class CamVidSegmentation : MonoBehaviour
     {
         // Copy the source image texture into model input texture
         Graphics.Blit(imageTexture, inputTexture);
-        // Normalize the input pixel data
-        Utils.ProcessImageGPU(inputTexture, processingShader, "NormalizeImageNet");
 
-        // Initialize a Tensor using the inputTexture
-        input = new Tensor(inputTexture, channels: 3);
+        if (SystemInfo.supportsComputeShaders)
+        {
+            // Normalize the input pixel data
+            Utils.ProcessImageGPU(inputTexture, processingShader, "NormalizeImageNet");
+            // Initialize a Tensor using the inputTexture
+            input = new Tensor(inputTexture, channels: 3);
+        }
+        else
+        {
+            // Define a temporary HDR RenderTexture
+            RenderTexture result = RenderTexture.GetTemporary(inputTexture.width,
+                inputTexture.height, 24, RenderTextureFormat.ARGBHalf);
+            RenderTexture.active = result;
+
+            // Apply preprocessing steps
+            Graphics.Blit(inputTexture, result, processingMaterial);
+
+            // Initialize a Tensor using the inputTexture
+            input = new Tensor(result, channels: 3);
+            RenderTexture.ReleaseTemporary(result);
+        }
+
         // Execute the model with the input Tensor
         engine.Execute(input);
         // Dispose Tensor and associated memories.
@@ -180,6 +212,26 @@ public class CamVidSegmentation : MonoBehaviour
 
         // Get the predicted label colors
         ProcessOutput(engine);
+    }
+
+
+    // OnGUI is called for rendering and handling GUI events.
+    public void OnGUI()
+    {
+        if (!printDebugMessages) return;
+
+        GUIStyle style = new GUIStyle();
+        style.fontSize = (int)(Screen.width * (1f / (100f - fontScale)));
+        style.normal.textColor = textColor;
+
+        if (Time.unscaledTime > fpsTimer)
+        {
+            fps = (int)(1f / Time.unscaledDeltaTime);
+            fpsTimer = Time.unscaledTime + fpsRefreshRate;
+        }
+
+        Rect fpsRect = new Rect(10, 10, 500, 500);
+        GUI.Label(fpsRect, new GUIContent($"FPS: {fps}"), style);
     }
 
 
