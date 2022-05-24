@@ -356,7 +356,7 @@ MonoBehaviour:
   modelAsset: {fileID: 5022602860645237092, guid: 3f01eea9d777ee04fabf8549e1c5530e, type: 3}
   softmaxLayer: softmaxLayer
   argmaxLayer: argmaxLayer
-  workerType: 256
+  workerType: 32768
   outputLayerIndex: 0
   useNCHW: 1
   useAsyncGPUReadback: 1
