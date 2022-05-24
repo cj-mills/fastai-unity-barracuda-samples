@@ -352,6 +352,7 @@ MonoBehaviour:
   screen: {fileID: 579329321}
   inputDims: {x: 320, y: 240}
   processingShader: {fileID: 7200000, guid: 31bbfd1191cb79e458e3a7f8756404a8, type: 3}
+  processingMaterial: {fileID: 2100000, guid: b7471655d6e59b9429d2b0d42a3ebb81, type: 2}
   modelAsset: {fileID: 5022602860645237092, guid: 70e83cb0793770e42a5c5fee74c4a6b4, type: 3}
   argmaxLayer: argmaxLayer
   workerType: 32768
@@ -360,4 +361,7 @@ MonoBehaviour:
   maskShader: {fileID: 7200000, guid: 588bd120e1c69384d8a214da05b09886, type: 3}
   maskImage: 1
   maskWeight: 0.5
-  printDebugMessages: 0
+  printDebugMessages: 1
+  textColor: {r: 1, g: 0, b: 0, a: 1}
+  fontScale: 50
+  fpsRefreshRate: 0.1
