@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/CamVid.unity
-    guid: 6f608e7e8efba8747a47463fda716370
+    path: Assets/Scenes/Pascal_Multi-label_Classification.unity
+    guid: a1d35f5bc1db867469b802db05afeeac
   m_configObjects: {}
