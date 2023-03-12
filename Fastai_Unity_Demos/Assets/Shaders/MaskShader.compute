@@ -1,0 +1,100 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CamVidMaskImage
+
+//
+Texture2D<float4> SourceImage;
+// The pixel data for the input image
+Texture2D<float4> MaskTexture;
+// The pixel data for the processed image
+RWTexture2D<float4> Result;
+
+float maskWeight;
+
+
+ //Apply the ImageNet normalization stats from PyTorch to an image
+[numthreads(8, 8, 1)]
+void CamVidMaskImage(uint3 id : SV_DispatchThreadID)
+{
+    int3 colors[32] =
+    {
+        // Animal
+        int3(89, 175, 198),
+        // Archway
+        int3(127, 80, 237),
+        // Bicyclist
+        int3(249, 135, 4),
+        // Bridge
+        int3(102, 17, 175),
+        // Building
+        int3(65, 209, 211),
+        // Car
+        int3(138, 173, 12),
+        // CartLuggagePram
+        int3(247, 218, 56),
+        // Child
+        int3(93, 234, 105),
+        // Column_Pole
+        int3(244, 194, 41),
+        // Fence
+        int3(16, 104, 181),
+        // LaneMkgsDriv
+        int3(178, 44, 60),
+        // LaneMkgsNonDriv
+        int3(60, 232, 88),
+        // Misc_Text
+        int3(42, 70, 211),
+        // MotorcycleScooter
+        int3(75, 211, 44),
+        // OtherMoving
+        int3(95, 47, 216),
+        // ParkingBlock
+        int3(3, 157, 163),
+        // Pedestrian
+        int3(162, 247, 89),
+        // Road
+        int3(226, 134, 83),
+        // RoadShoulder
+        int3(106, 235, 252),
+        // Sidewalk
+        int3(216, 180, 49),
+        // SignSymbol
+        int3(232, 219, 102),
+        // Sky
+        int3(252, 45, 59),
+        // SUVPickupTruck
+        int3(12, 244, 4),
+        // TrafficCone
+        int3(62, 224, 181),
+        // TrafficLight
+        int3(32, 156, 191),
+        // Train
+        int3(224, 153, 71),
+        // Tree
+        int3(239, 207, 62),
+        // Truck_Bus
+        int3(80, 139, 206),
+        // Tunnel
+        int3(204, 34, 178),
+        // VegetationMisc
+        int3(65, 198, 172),
+        // Void
+        int3(190, 32, 234),
+        // Wall
+        int3(7, 130, 81)
+    };
+ 
+
+    // Get the label index
+    int index = (int)MaskTexture[id.xy].r;
+
+    // Get the mask color value for the current pixel
+    float4 maskColor = float4(
+        colors[index].r / 255.0f,
+        colors[index].g / 255.0f,
+        colors[index].b / 255.0f,
+        1.0f
+        );
+
+    // Set the pixel color values for the processed image
+    Result[id.xy] = maskColor * maskWeight + (1 - maskWeight) * SourceImage[id.xy];
+}

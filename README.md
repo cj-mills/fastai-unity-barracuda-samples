@@ -1,2 +1,18 @@
-# fastai-unity-barracuda-samples
- 
+# fastai Unity Barracuda Samples
+This repository provides a sample project for the Unity game engine that implements different models trained with the [fastai](https://docs.fast.ai/) library using the [Barracuda](https://docs.unity3d.com/Packages/com.unity.barracuda@3.0/manual/index.html) library along with the Jupyter notebooks used to train and export the models.
+
+
+
+## Sample Unity Scenes
+
+### Beginner
+
+#### Vision
+
+| Live Demo                             | Description                                                  | fastai Tutorial                                              | Colab                                                        | Kaggle                                                       |
+| --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [BIWI_Head_Pose](https://cj-mills.github.io/Fastai-BIWI_Head_Pose-WebGL-Demo/)                    | Predict the center head coordinates of a person in an image using a model trained on the [Biwi Kinect Head Pose Dataset](https://data.vision.ee.ethz.ch/cvl/gfanelli/head_pose/head_forest.html#db). | [Points](https://docs.fast.ai/tutorial.vision.html#Points)   | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/BIWI_Head_Pose.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/BIWI_Head_Pose.ipynb) |
+| [Oxford-IIT_Breed_Classification](https://cj-mills.github.io/Fastai-Oxford-IIT_Breed_Classification-WebGL-Demo/)   | Classify an image as containing one of the 37 bet breeds from the [Oxford-IIIT Pet Dataset](https://www.robots.ox.ac.uk/~vgg/data/pets/). | [Classifying breeds](https://docs.fast.ai/tutorial.vision.html#Classifying-breeds) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/Oxford-IIT_Breed_Classification.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/Oxford-IIT_Breed_Classification.ipynb) |
+| [Pascal_Multi-label_Classification](https://cj-mills.github.io/Fastai-Pascal_Multi-label_Classification-WebGL-Demo/) | Perform multi-label classification using a model trained on the [Pascal Dataset](http://host.robots.ox.ac.uk/pascal/VOC/). | [Multi-label classification](https://docs.fast.ai/tutorial.vision.html#Multi-label-classification) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/Pascal_Multi-label_Classification.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/Pascal_Multi-label_Classification.ipynb) |
+| CamVid Image Segmentation         | Predict a category for each pixel of an image using a model trained on the [CamVid Dataset](http://mi.eng.cam.ac.uk/research/projects/VideoRec/CamVid/). | [Segmentation](https://docs.fast.ai/tutorial.vision.html#Segmentation) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/CamVid_Image_Segmentation.ipynb) | [![Kaggle](https://kaggle.com/static/images/open-in-kaggle.svg)](https://kaggle.com/kernels/welcome?src=https://github.com/cj-mills/fastai-unity-barracuda-samples/blob/main/notebooks/CamVid_Image_Segmentation.ipynb) |
+
